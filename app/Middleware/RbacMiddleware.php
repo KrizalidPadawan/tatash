@@ -9,10 +9,15 @@ use App\Interface\Http\Response;
 
 final class RbacMiddleware
 {
+    /** @var UserRepository|callable */
+    private mixed $users;
+
     public function __construct(
-        private readonly UserRepository $users,
+        UserRepository|callable $users,
         private readonly string $permissionCode
-    ) {}
+    ) {
+        $this->users = $users;
+    }
 
     public function handle(Request $request, callable $next): Response
     {
@@ -22,7 +27,8 @@ final class RbacMiddleware
         }
 
         $roleId = (int) ($auth['role_id'] ?? 0);
-        if (!$this->users->hasPermission($roleId, $this->permissionCode)) {
+        $repo = $this->users instanceof UserRepository ? $this->users : ($this->users)();
+        if (!$repo->hasPermission($roleId, $this->permissionCode)) {
             return Response::json(false, [], [['code' => 'forbidden', 'message' => 'Insufficient permissions']], 403);
         }
 

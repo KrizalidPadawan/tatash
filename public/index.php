@@ -7,6 +7,7 @@ use App\Interface\Http\Response;
 use App\Interface\Http\Router;
 
 require dirname(__DIR__) . '/bootstrap/autoload.php';
+require dirname(__DIR__) . '/bootstrap/env.php';
 
 $appCfg = require dirname(__DIR__) . '/config/app.php';
 $secCfg = require dirname(__DIR__) . '/config/security.php';

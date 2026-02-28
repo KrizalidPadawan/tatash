@@ -16,6 +16,10 @@ final class Connection
         }
 
         $cfg = require dirname(__DIR__, 3) . '/config/database.php';
+        if (($cfg['driver'] ?? 'mysql') !== 'mysql') {
+            throw new \RuntimeException('Only mysql driver is supported');
+        }
+
         $dsn = sprintf(
             'mysql:host=%s;port=%d;dbname=%s;charset=%s',
             $cfg['host'],
