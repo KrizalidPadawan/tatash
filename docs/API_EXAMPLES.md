@@ -4,7 +4,6 @@
 Request:
 ```json
 {
-  "tenant_slug": "acme-inc",
   "email": "admin@acme.com",
   "password": "StrongPass!123"
 }

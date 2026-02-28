@@ -22,16 +22,16 @@ final class AuthController extends BaseController
 
     public function login(Request $request)
     {
+        $tenantSlug = trim((string) ($request->body['tenant_slug'] ?? ''));
         $email = strtolower(trim((string) ($request->body['email'] ?? '')));
         $password = (string) ($request->body['password'] ?? '');
-        $tenantSlug = trim((string) ($request->body['tenant_slug'] ?? ''));
 
-        if ($email === '' || $password === '' || $tenantSlug === '') {
+        if ($tenantSlug === '' || $email === '' || $password === '') {
             return $this->fail('validation_error', 'Tenant, email and password are required', 422);
         }
 
         try {
-            $tokens = $this->service()->login($email, $password, $tenantSlug, $request->ip);
+            $tokens = $this->service()->login($tenantSlug, $email, $password, $request->ip);
         } catch (\Throwable $e) {
             return $this->fail('auth_error', $e->getMessage(), 401);
         }

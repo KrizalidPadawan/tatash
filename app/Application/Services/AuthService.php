@@ -16,20 +16,21 @@ final class AuthService
         private readonly array $security
     ) {}
 
-    public function login(string $email, string $password, string $tenantSlug, string $ip): array
+    public function login(string $tenantSlug, string $email, string $password, string $ip): array
     {
         $attempts = $this->users->countRecentFailedAttempts($email, $ip, $this->security['login_lock_minutes']);
         if ($attempts >= $this->security['login_max_attempts']) {
             throw new \RuntimeException('Too many failed login attempts. Try again later.');
         }
 
-        $user = $this->users->findByEmailAndTenantSlug($email, $tenantSlug);
+        $user = $this->users->findByTenantAndEmail($tenantSlug, $email);
         if (!$user || !(bool) $user['active'] || !password_verify($password, $user['password_hash'])) {
             $this->users->recordLoginAttempt($email, $ip);
             throw new \RuntimeException('Invalid credentials');
         }
 
         $this->users->clearLoginAttempts($email, $ip);
+        $this->users->updateLastLogin((int) $user['id']);
 
         $claims = [
             'sub' => (int) $user['id'],

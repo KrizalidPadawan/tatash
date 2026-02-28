@@ -9,18 +9,33 @@ final class UserRepository
 {
     public function __construct(private readonly PDO $db) {}
 
-    public function findByEmailAndTenantSlug(string $email, string $tenantSlug): ?array
+    public function findByTenantAndEmail(string $tenantSlug, string $email): ?array
     {
-        $sql = 'SELECT u.id, u.tenant_id, u.role_id, u.email, u.password_hash, u.active
+        $sql = 'SELECT u.id, u.tenant_id, u.role_id, u.full_name, u.email, u.password_hash, u.active
                 FROM users u
                 INNER JOIN tenants t ON t.id = u.tenant_id
-                WHERE u.email = :email AND t.slug = :tenant_slug
+                WHERE t.slug = :tenant_slug
+                  AND t.active = 1
+                  AND u.email = :email
                 LIMIT 1';
         $stmt = $this->db->prepare($sql);
-        $stmt->execute(['email' => $email, 'tenant_slug' => $tenantSlug]);
+        $stmt->execute([
+            'tenant_slug' => $tenantSlug,
+            'email' => $email,
+        ]);
         $row = $stmt->fetch();
 
         return $row ?: null;
+    }
+
+    public function updateLastLogin(int $userId): void
+    {
+        $sql = 'UPDATE users
+                SET last_login_at = NOW()
+                WHERE id = :id
+                LIMIT 1';
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(['id' => $userId]);
     }
 
     public function hasPermission(int $roleId, string $permission): bool
