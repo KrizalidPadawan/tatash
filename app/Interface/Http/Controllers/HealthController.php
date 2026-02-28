@@ -23,9 +23,20 @@ final class HealthController extends BaseController
 
         $cache = new ApcuFileCache(dirname(__DIR__, 4) . '/storage/cache');
         $probeKey = 'health_probe';
-        $cache->set($probeKey, 'ok', 10);
-        $cacheOk = $cache->get($probeKey) === 'ok';
-        $cache->delete($probeKey);
+        $cacheMessage = 'ok';
+        $cacheMeta = $cache->diagnostics();
+
+        try {
+            $cache->set($probeKey, 'ok', 10);
+            $cacheOk = $cache->get($probeKey) === 'ok';
+            $cache->delete($probeKey);
+            if (!$cacheOk) {
+                $cacheMessage = 'Cache probe read/write failed';
+            }
+        } catch (\Throwable $e) {
+            $cacheOk = false;
+            $cacheMessage = $e->getMessage();
+        }
 
         $status = ($dbOk && $cacheOk) ? 'ready' : 'degraded';
 
@@ -39,7 +50,11 @@ final class HealthController extends BaseController
                 ],
                 'cache' => [
                     'ok' => $cacheOk,
-                    'driver' => function_exists('apcu_enabled') && apcu_enabled() ? 'apcu' : 'file',
+                    'driver' => $cacheMeta['apcu_enabled'] ? 'apcu' : 'file',
+                    'message' => $cacheMessage,
+                    'path' => $cacheMeta['path'],
+                    'directory_exists' => $cacheMeta['directory_exists'],
+                    'directory_writable' => $cacheMeta['directory_writable'],
                 ],
             ],
         ]);

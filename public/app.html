@@ -3,19 +3,301 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#0a3d62">
-  <title>Financial SaaS</title>
+  <meta name="theme-color" content="#17324d">
+  <title>Financial SaaS Console</title>
   <link rel="manifest" href="/manifest.json">
   <link rel="stylesheet" href="/assets/css/app.css">
 </head>
 <body>
-  <main class="container">
-    <section class="card">
-      <h1>Financial SaaS</h1>
-      <p>Instancia API-first multi-tenant preparada para producción.</p>
-      <p id="health-status">Verificando estado...</p>
-    </section>
-  </main>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Navegacion principal">
+      <div class="brand-block">
+        <p class="eyebrow">Financial SaaS</p>
+        <h1>Control financiero multi-tenant</h1>
+        <p class="muted">Consola operativa para autenticacion, monitoreo, registro y analitica.</p>
+      </div>
+
+      <nav class="nav-grid">
+        <button type="button" class="nav-link is-active" data-view-target="auth">Acceso</button>
+        <button type="button" class="nav-link" data-view-target="dashboard" data-auth-only>Dashboard</button>
+        <button type="button" class="nav-link" data-view-target="transactions" data-auth-only>Transacciones</button>
+        <button type="button" class="nav-link" data-view-target="reports" data-auth-only>Reportes</button>
+      </nav>
+
+      <section class="status-card">
+        <p class="section-kicker">Sesion</p>
+        <div class="session-row">
+          <span>Tenant</span>
+          <strong id="session-tenant">Sin sesion</strong>
+        </div>
+        <div class="session-row">
+          <span>Usuario</span>
+          <strong id="session-email">Invitado</strong>
+        </div>
+        <div class="session-row">
+          <span>Estado</span>
+          <strong id="session-state">Esperando login</strong>
+        </div>
+        <button type="button" id="logout-button" class="ghost-button" hidden>Cerrar sesion</button>
+      </section>
+    </aside>
+
+    <main class="workspace">
+      <header class="hero-bar">
+        <div>
+          <p class="eyebrow">Centro de operaciones</p>
+          <h2 id="page-title">Ingreso seguro</h2>
+        </div>
+        <div class="hero-meta">
+          <div class="hero-chip">
+            <span>API</span>
+            <strong id="api-status-chip">Verificando</strong>
+          </div>
+          <div class="hero-chip">
+            <span>Token</span>
+            <strong id="token-status-chip">No disponible</strong>
+          </div>
+        </div>
+      </header>
+
+      <section id="global-alert" class="alert-banner" hidden aria-live="polite"></section>
+
+      <section id="auth-view" class="view-panel is-active" data-view="auth">
+        <div class="panel-grid auth-grid">
+          <article class="feature-panel feature-panel-accent">
+            <p class="section-kicker">Login</p>
+            <h3>Empieza por una autenticacion clara y verificable.</h3>
+            <p class="muted">El flujo usa JWT de acceso y refresh rotativo. Desde aqui se habilitan las demas vistas de operacion.</p>
+            <ul class="bullet-list">
+              <li>Ingreso por tenant y credenciales.</li>
+              <li>Renovacion de token automatica.</li>
+              <li>Indicadores de salud disponibles antes de entrar.</li>
+            </ul>
+          </article>
+
+          <article class="form-panel">
+            <div class="panel-head">
+              <p class="section-kicker">Acceso seguro</p>
+              <h3>Iniciar sesion</h3>
+            </div>
+
+            <form id="login-form" class="stack-form">
+              <label class="field">
+                <span>Tenant slug</span>
+                <input type="text" name="tenant_slug" placeholder="acme-inc" autocomplete="organization" required>
+              </label>
+              <label class="field">
+                <span>Email</span>
+                <input type="email" name="email" placeholder="admin@acme.com" autocomplete="email" required>
+              </label>
+              <label class="field">
+                <span>Contrasena</span>
+                <input type="password" name="password" placeholder="••••••••" autocomplete="current-password" required>
+              </label>
+              <button type="submit" id="login-submit" class="primary-button">Entrar</button>
+            </form>
+
+            <div class="micro-grid">
+              <div class="metric-chip">
+                <span>Endpoint</span>
+                <strong>POST /api/v1/auth/login</strong>
+              </div>
+              <div class="metric-chip">
+                <span>Refresh</span>
+                <strong>POST /api/v1/auth/refresh</strong>
+              </div>
+            </div>
+          </article>
+        </div>
+
+        <article class="panel-grid">
+          <section class="surface-panel">
+            <div class="panel-head">
+              <p class="section-kicker">Salud de plataforma</p>
+              <h3>Chequeo en vivo</h3>
+            </div>
+            <div id="health-grid" class="stats-grid">
+              <div class="stat-card">
+                <span>Estado</span>
+                <strong id="health-status-label">Cargando</strong>
+              </div>
+              <div class="stat-card">
+                <span>Base de datos</span>
+                <strong id="health-db-label">...</strong>
+              </div>
+              <div class="stat-card">
+                <span>Cache</span>
+                <strong id="health-cache-label">...</strong>
+              </div>
+              <div class="stat-card">
+                <span>Ruta</span>
+                <strong>/api/v1/health</strong>
+              </div>
+            </div>
+          </section>
+        </article>
+      </section>
+
+      <section id="dashboard-view" class="view-panel" data-view="dashboard" hidden>
+        <div class="panel-grid">
+          <section class="surface-panel">
+            <div class="panel-head">
+              <p class="section-kicker">Resumen ejecutivo</p>
+              <h3>Indicadores principales</h3>
+            </div>
+            <div class="stats-grid">
+              <div class="stat-card">
+                <span>Ingresos</span>
+                <strong id="dashboard-income">$0</strong>
+              </div>
+              <div class="stat-card">
+                <span>Gastos</span>
+                <strong id="dashboard-expense">$0</strong>
+              </div>
+              <div class="stat-card">
+                <span>Resultado</span>
+                <strong id="dashboard-balance">$0</strong>
+              </div>
+              <div class="stat-card">
+                <span>Movimientos</span>
+                <strong id="dashboard-tx-count">0</strong>
+              </div>
+            </div>
+          </section>
+
+          <section class="surface-panel">
+            <div class="panel-head">
+              <p class="section-kicker">Pulso operativo</p>
+              <h3>Estado del entorno</h3>
+            </div>
+            <div class="pulse-list">
+              <div class="pulse-row">
+                <span>API publica</span>
+                <strong id="dashboard-api-health">Verificando</strong>
+              </div>
+              <div class="pulse-row">
+                <span>Base de datos</span>
+                <strong id="dashboard-db-health">Pendiente</strong>
+              </div>
+              <div class="pulse-row">
+                <span>Cache</span>
+                <strong id="dashboard-cache-health">Pendiente</strong>
+              </div>
+              <div class="pulse-row">
+                <span>Ultima actualizacion</span>
+                <strong id="dashboard-updated-at">-</strong>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section id="transactions-view" class="view-panel" data-view="transactions" hidden>
+        <div class="panel-grid transactions-grid">
+          <section class="surface-panel">
+            <div class="panel-head">
+              <p class="section-kicker">Alta de movimiento</p>
+              <h3>Nueva transaccion</h3>
+            </div>
+
+            <form id="transaction-form" class="stack-form">
+              <div class="field-row">
+                <label class="field">
+                  <span>Categoria</span>
+                  <input type="number" min="1" name="category_id" placeholder="3" required>
+                </label>
+                <label class="field">
+                  <span>Tipo</span>
+                  <select name="type" required>
+                    <option value="expense">Gasto</option>
+                    <option value="income">Ingreso</option>
+                  </select>
+                </label>
+              </div>
+              <div class="field-row">
+                <label class="field">
+                  <span>Monto</span>
+                  <input type="number" min="0" step="0.01" name="amount" placeholder="120.45" required>
+                </label>
+                <label class="field">
+                  <span>Fecha</span>
+                  <input type="date" name="transaction_date" required>
+                </label>
+              </div>
+              <label class="field">
+                <span>Descripcion</span>
+                <input type="text" name="description" placeholder="Suscripcion anual" required>
+              </label>
+              <button type="submit" id="transaction-submit" class="primary-button">Guardar movimiento</button>
+            </form>
+          </section>
+
+          <section class="surface-panel">
+            <div class="panel-head">
+              <p class="section-kicker">Libro diario</p>
+              <h3>Ultimos registros</h3>
+            </div>
+
+            <div id="transactions-empty" class="empty-state">No hay transacciones cargadas todavia.</div>
+            <div id="transactions-list" class="transaction-list"></div>
+
+            <div class="pager">
+              <button type="button" id="transactions-prev" class="ghost-button">Anterior</button>
+              <span id="transactions-page-label">Pagina 1 de 1</span>
+              <button type="button" id="transactions-next" class="ghost-button">Siguiente</button>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section id="reports-view" class="view-panel" data-view="reports" hidden>
+        <div class="panel-grid reports-grid">
+          <section class="surface-panel">
+            <div class="panel-head">
+              <p class="section-kicker">Cierre mensual</p>
+              <h3>Reporte por mes</h3>
+            </div>
+
+            <form id="report-form" class="inline-form">
+              <label class="field">
+                <span>Mes</span>
+                <input type="month" id="report-month" name="month" required>
+              </label>
+              <button type="submit" class="primary-button">Consultar</button>
+            </form>
+
+            <div id="report-summary" class="report-stack"></div>
+          </section>
+
+          <section class="surface-panel">
+            <div class="panel-head">
+              <p class="section-kicker">Lectura rapida</p>
+              <h3>Balance del periodo</h3>
+            </div>
+            <div class="stats-grid compact-grid">
+              <div class="stat-card">
+                <span>Mes</span>
+                <strong id="report-month-label">-</strong>
+              </div>
+              <div class="stat-card">
+                <span>Ingresos</span>
+                <strong id="report-income-label">$0</strong>
+              </div>
+              <div class="stat-card">
+                <span>Gastos</span>
+                <strong id="report-expense-label">$0</strong>
+              </div>
+              <div class="stat-card">
+                <span>Resultado</span>
+                <strong id="report-balance-label">$0</strong>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+  </div>
+
   <script src="/assets/js/app.js"></script>
   <script src="/register-sw.js"></script>
 </body>

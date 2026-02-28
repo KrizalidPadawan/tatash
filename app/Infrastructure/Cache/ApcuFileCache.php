@@ -8,14 +8,14 @@ final class ApcuFileCache implements CacheInterface
     public function __construct(private readonly string $cachePath)
     {
         if (!is_dir($cachePath)) {
-            mkdir($cachePath, 0775, true);
+            @mkdir($cachePath, 0775, true);
         }
     }
 
     public function get(string $key, mixed $default = null): mixed
     {
         $k = $this->normalize($key);
-        if (function_exists('apcu_fetch') && ini_get('apc.enabled')) {
+        if ($this->shouldUseApcu()) {
             $ok = false;
             $value = apcu_fetch($k, $ok);
             if ($ok) {
@@ -40,29 +40,31 @@ final class ApcuFileCache implements CacheInterface
     public function set(string $key, mixed $value, int $ttlSeconds): void
     {
         $k = $this->normalize($key);
-        if (function_exists('apcu_store') && ini_get('apc.enabled')) {
-            apcu_store($k, $value, $ttlSeconds);
+        if ($this->shouldUseApcu() && apcu_store($k, $value, $ttlSeconds)) {
             return;
         }
 
         $file = $this->fileFor($k);
+        $this->ensureCacheDirectory();
         file_put_contents($file, json_encode([
             'expires_at' => time() + $ttlSeconds,
             'value' => $value,
-        ], JSON_THROW_ON_ERROR));
+        ], JSON_THROW_ON_ERROR), LOCK_EX);
     }
 
     public function increment(string $key, int $ttlSeconds): int
     {
         $k = $this->normalize($key);
-        if (function_exists('apcu_inc') && ini_get('apc.enabled')) {
+        if ($this->shouldUseApcu()) {
             $ok = false;
             $value = apcu_inc($k, 1, $ok, $ttlSeconds);
             if (!$ok) {
-                apcu_store($k, 1, $ttlSeconds);
-                return 1;
+                if (apcu_store($k, 1, $ttlSeconds)) {
+                    return 1;
+                }
+            } else {
+                return (int) $value;
             }
-            return (int) $value;
         }
 
         $current = (int) $this->get($k, 0);
@@ -74,10 +76,22 @@ final class ApcuFileCache implements CacheInterface
     public function delete(string $key): void
     {
         $k = $this->normalize($key);
-        if (function_exists('apcu_delete') && ini_get('apc.enabled')) {
+        if ($this->shouldUseApcu()) {
             apcu_delete($k);
         }
         @unlink($this->fileFor($k));
+    }
+
+    public function diagnostics(): array
+    {
+        $this->ensureCacheDirectory();
+
+        return [
+            'apcu_enabled' => $this->shouldUseApcu(),
+            'path' => $this->cachePath,
+            'directory_exists' => is_dir($this->cachePath),
+            'directory_writable' => is_dir($this->cachePath) && is_writable($this->cachePath),
+        ];
     }
 
     private function normalize(string $key): string
@@ -88,5 +102,25 @@ final class ApcuFileCache implements CacheInterface
     private function fileFor(string $key): string
     {
         return rtrim($this->cachePath, '/') . '/' . sha1($key) . '.cache.json';
+    }
+
+    private function ensureCacheDirectory(): void
+    {
+        if (!is_dir($this->cachePath)) {
+            @mkdir($this->cachePath, 0775, true);
+        }
+    }
+
+    private function shouldUseApcu(): bool
+    {
+        if (!function_exists('apcu_store') || !function_exists('apcu_fetch')) {
+            return false;
+        }
+
+        if (function_exists('apcu_enabled')) {
+            return apcu_enabled();
+        }
+
+        return filter_var((string) ini_get('apc.enabled'), FILTER_VALIDATE_BOOL);
     }
 }
