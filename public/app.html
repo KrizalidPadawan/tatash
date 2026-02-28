@@ -65,46 +65,53 @@
       <section id="auth-view" class="view-panel is-active" data-view="auth">
         <div class="panel-grid auth-grid">
           <article class="feature-panel feature-panel-accent">
-            <p class="section-kicker">Login</p>
-            <h3>Empieza por una autenticacion clara y verificable.</h3>
-            <p class="muted">El flujo usa JWT de acceso y refresh rotativo. Desde aqui se habilitan las demas vistas de operacion.</p>
+            <p class="section-kicker">Bienvenida</p>
+            <h3>Entra en menos pasos y con menos friccion.</h3>
+            <p class="muted">Solo necesitas tu tenant, correo y contrasena. Cuando entres, el sistema deja listas las vistas de control y recupera tu sesion automaticamente.</p>
             <ul class="bullet-list">
-              <li>Ingreso por tenant y credenciales.</li>
-              <li>Renovacion de token automatica.</li>
-              <li>Indicadores de salud disponibles antes de entrar.</li>
+              <li>Acceso guiado con campos claros.</li>
+              <li>Renovacion de token automatica en segundo plano.</li>
+              <li>Chequeo de salud visible antes de autenticar.</li>
             </ul>
           </article>
 
           <article class="form-panel">
             <div class="panel-head">
               <p class="section-kicker">Acceso seguro</p>
-              <h3>Iniciar sesion</h3>
+              <h3>Inicia sesion</h3>
+              <p class="panel-copy">Completa tus datos y entra a tu panel. Si ya usaste esta consola, retomaremos la sesion cuando el token siga vigente.</p>
             </div>
 
             <form id="login-form" class="stack-form">
               <label class="field">
-                <span>Tenant slug</span>
+                <span>Empresa o tenant</span>
                 <input type="text" name="tenant_slug" placeholder="acme-inc" autocomplete="organization" required>
+                <small class="field-hint">Usa el identificador corto de tu organizacion, por ejemplo <strong>acme-inc</strong>.</small>
               </label>
               <label class="field">
                 <span>Email</span>
                 <input type="email" name="email" placeholder="admin@acme.com" autocomplete="email" required>
+                <small class="field-hint">Ingresa el correo con el que administras la cuenta.</small>
               </label>
               <label class="field">
                 <span>Contrasena</span>
-                <input type="password" name="password" placeholder="••••••••" autocomplete="current-password" required>
+                <div class="password-field">
+                  <input type="password" id="password-input" name="password" placeholder="Tu contrasena" autocomplete="current-password" required>
+                  <button type="button" id="password-toggle" class="inline-toggle" aria-label="Mostrar contrasena" aria-pressed="false">Mostrar</button>
+                </div>
+                <small class="field-hint">Puedes mostrarla un momento para revisar que no tenga errores al escribir.</small>
               </label>
-              <button type="submit" id="login-submit" class="primary-button">Entrar</button>
+              <button type="submit" id="login-submit" class="primary-button">Entrar al panel</button>
             </form>
 
             <div class="micro-grid">
               <div class="metric-chip">
-                <span>Endpoint</span>
-                <strong>POST /api/v1/auth/login</strong>
+                <span>Necesitas</span>
+                <strong>Tenant + email + contrasena</strong>
               </div>
               <div class="metric-chip">
-                <span>Refresh</span>
-                <strong>POST /api/v1/auth/refresh</strong>
+                <span>Sesion</span>
+                <strong>Refresh automatico</strong>
               </div>
             </div>
           </article>

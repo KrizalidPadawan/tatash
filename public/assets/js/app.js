@@ -34,6 +34,8 @@
     tokenStatusChip: document.getElementById('token-status-chip'),
     loginForm: document.getElementById('login-form'),
     loginSubmit: document.getElementById('login-submit'),
+    passwordInput: document.getElementById('password-input'),
+    passwordToggle: document.getElementById('password-toggle'),
     logoutButton: document.getElementById('logout-button'),
     sessionTenant: document.getElementById('session-tenant'),
     sessionEmail: document.getElementById('session-email'),
@@ -104,6 +106,7 @@
     });
 
     nodes.loginForm.addEventListener('submit', handleLogin);
+    nodes.passwordToggle.addEventListener('click', togglePasswordVisibility);
     nodes.logoutButton.addEventListener('click', handleLogout);
     nodes.transactionForm.addEventListener('submit', handleCreateTransaction);
     nodes.reportForm.addEventListener('submit', handleReportSubmit);
@@ -235,8 +238,17 @@
     } catch (error) {
       handleError(error, 'No fue posible iniciar sesion.');
     } finally {
-      setButtonBusy(nodes.loginSubmit, false, 'Entrar');
+      setButtonBusy(nodes.loginSubmit, false, 'Entrar al panel');
     }
+  }
+
+  function togglePasswordVisibility() {
+    const shouldShow = nodes.passwordInput.type === 'password';
+    nodes.passwordInput.type = shouldShow ? 'text' : 'password';
+    nodes.passwordToggle.textContent = shouldShow ? 'Ocultar' : 'Mostrar';
+    nodes.passwordToggle.classList.toggle('is-active', shouldShow);
+    nodes.passwordToggle.setAttribute('aria-pressed', shouldShow ? 'true' : 'false');
+    nodes.passwordToggle.setAttribute('aria-label', shouldShow ? 'Ocultar contrasena' : 'Mostrar contrasena');
   }
 
   function handleLogout() {

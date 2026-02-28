@@ -137,8 +137,8 @@ CREATE TABLE IF NOT EXISTS audit_logs (
   KEY idx_audit_tenant_user (tenant_id, user_id),
   CONSTRAINT fk_audit_tenant
     FOREIGN KEY (tenant_id) REFERENCES tenants(id) ON DELETE CASCADE,
-  CONSTRAINT fk_audit_user_tenant
-    FOREIGN KEY (user_id, tenant_id) REFERENCES users(id, tenant_id) ON DELETE SET NULL
+  CONSTRAINT fk_audit_user
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB ROW_FORMAT=DYNAMIC;
 
 CREATE TABLE IF NOT EXISTS refresh_tokens (
