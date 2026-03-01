@@ -55,3 +55,9 @@ sudo systemctl reload apache2
 - Storage de recibos en `/storage/receipts` (preparado para mover a S3/MinIO)
 - DB separable por host dedicado
 - Apache listo para reverse proxy (Nginx futuro)
+
+## DEMO
+- tenant: demo
+- Administrador Demo: admin@demo.com / Admin123!
+- Ingresador Demo: ingresador@demo.com / Ingresador123!
+- Visualizador Demo: visualizador@demo.com / Visualizador123!
