@@ -14,7 +14,6 @@
     accessToken: '',
     refreshToken: '',
     session: {
-      tenant: '',
       email: '',
     },
     isAuthenticated: false,
@@ -37,7 +36,6 @@
     passwordInput: document.getElementById('password-input'),
     passwordToggle: document.getElementById('password-toggle'),
     logoutButton: document.getElementById('logout-button'),
-    sessionTenant: document.getElementById('session-tenant'),
     sessionEmail: document.getElementById('session-email'),
     sessionState: document.getElementById('session-state'),
     navLinks: Array.from(document.querySelectorAll('.nav-link')),
@@ -141,7 +139,6 @@
       const parsed = JSON.parse(raw);
       state.accessToken = typeof parsed.accessToken === 'string' ? parsed.accessToken : '';
       state.refreshToken = typeof parsed.refreshToken === 'string' ? parsed.refreshToken : '';
-      state.session.tenant = typeof parsed.tenant === 'string' ? parsed.tenant : '';
       state.session.email = typeof parsed.email === 'string' ? parsed.email : '';
       state.isAuthenticated = Boolean(state.accessToken);
     } catch (_error) {
@@ -155,7 +152,6 @@
       JSON.stringify({
         accessToken: state.accessToken,
         refreshToken: state.refreshToken,
-        tenant: state.session.tenant,
         email: state.session.email,
       })
     );
@@ -166,7 +162,6 @@
   }
 
   function renderSessionState() {
-    nodes.sessionTenant.textContent = state.session.tenant || 'Sin sesion';
     nodes.sessionEmail.textContent = state.session.email || 'Invitado';
     nodes.sessionState.textContent = state.isAuthenticated ? 'Activa' : 'Esperando login';
     nodes.apiStatusChip.textContent = formatHealthStatus(state.health);
@@ -210,7 +205,6 @@
 
     const formData = new FormData(nodes.loginForm);
     const payload = {
-      tenant_slug: String(formData.get('tenant_slug') || '').trim(),
       email: String(formData.get('email') || '').trim().toLowerCase(),
       password: String(formData.get('password') || ''),
     };
@@ -224,7 +218,6 @@
       const data = response.data || {};
       state.accessToken = String(data.access_token || '');
       state.refreshToken = String(data.refresh_token || '');
-      state.session.tenant = payload.tenant_slug;
       state.session.email = payload.email;
       state.isAuthenticated = Boolean(state.accessToken);
 
@@ -257,7 +250,6 @@
   function handleLogout() {
     state.accessToken = '';
     state.refreshToken = '';
-    state.session.tenant = '';
     state.session.email = '';
     state.isAuthenticated = false;
     state.refreshPromise = null;

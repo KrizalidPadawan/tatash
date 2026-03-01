@@ -27,10 +27,6 @@
       <section class="status-card">
         <p class="section-kicker">Sesion</p>
         <div class="session-row">
-          <span>Tenant</span>
-          <strong id="session-tenant">Sin sesion</strong>
-        </div>
-        <div class="session-row">
           <span>Usuario</span>
           <strong id="session-email">Invitado</strong>
         </div>
@@ -67,7 +63,7 @@
           <article class="feature-panel feature-panel-accent">
             <p class="section-kicker">Bienvenida</p>
             <h3>Entra en menos pasos y con menos friccion.</h3>
-            <p class="muted">Solo necesitas tu tenant, correo y contrasena. Cuando entres, el sistema deja listas las vistas de control y recupera tu sesion automaticamente.</p>
+            <p class="muted">Solo necesitas tu correo y contrasena. Cuando entres, el sistema deja listas las vistas de control y recupera tu sesion automaticamente.</p>
             <ul class="bullet-list">
               <li>Acceso guiado con campos claros.</li>
               <li>Renovacion de token automatica en segundo plano.</li>
@@ -83,11 +79,6 @@
             </div>
 
             <form id="login-form" class="stack-form">
-              <label class="field">
-                <span>Empresa o tenant</span>
-                <input type="text" name="tenant_slug" placeholder="acme-inc" autocomplete="organization" required>
-                <small class="field-hint">Usa el identificador corto de tu organizacion, por ejemplo <strong>acme-inc</strong>.</small>
-              </label>
               <label class="field">
                 <span>Email</span>
                 <input type="email" name="email" placeholder="admin@acme.com" autocomplete="email" required>
@@ -107,7 +98,7 @@
             <div class="micro-grid">
               <div class="metric-chip">
                 <span>Necesitas</span>
-                <strong>Tenant + email + contrasena</strong>
+                <strong>Email + contrasena</strong>
               </div>
               <div class="metric-chip">
                 <span>Sesion</span>
