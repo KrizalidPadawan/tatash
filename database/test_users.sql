@@ -1,6 +1,12 @@
 SET NAMES utf8mb4;
 SET time_zone = '+00:00';
 
+-- Credenciales demo:
+-- tenant: demo
+-- Administrador Demo: admin@demo.com / Admin123!
+-- Ingresador Demo: ingresador@demo.com / Ingresador123!
+-- Visualizador Demo: visualizador@demo.com / Visualizador123!
+
 INSERT INTO tenants (name, slug, plan, active)
 VALUES ('Tenant Demo', 'demo', 'basic', 1)
 ON DUPLICATE KEY UPDATE
@@ -14,7 +20,7 @@ SELECT
   r.id,
   'Administrador Demo',
   'admin@demo.com',
-  '$2y$10$HJ/94QvwleoN.Cl5nOzsVeD79kHM9oMTyqwkKSTpHgWtrHh7Rdupe',
+  '$2y$10$/50jawGe1e0mXTU08isUiOZvU1XRVIIdyELDIffp9cvgBPsnWIjRy',
   1
 FROM tenants t
 JOIN roles r ON r.code = 'ADMIN'
@@ -31,7 +37,7 @@ SELECT
   r.id,
   'Ingresador Demo',
   'ingresador@demo.com',
-  '$2y$10$x0rHPTjbLCYajtM283FJA.FbTZm3CDUfDPcSBd8ioy9Ml7MRNn6Gm',
+  '$2y$10$1tzii7YbAHvatRrj3frMf.d5xK6GEyfe7PdVsTXIRNBcPT3i8sL8u',
   1
 FROM tenants t
 JOIN roles r ON r.code = 'INGRESADOR'
@@ -48,7 +54,7 @@ SELECT
   r.id,
   'Visualizador Demo',
   'visualizador@demo.com',
-  '$2y$10$k.GLGNHIi8zI/Vy1vUeee.PWdY4oY0IF.cUjbjcVSP2b.LG9kfg36',
+  '$2y$10$xLqFDSIZ8V8ksQh6M3MIeuY.SPJoCECaIA5Hqi3T6T5xbTyXwyBRm',
   1
 FROM tenants t
 JOIN roles r ON r.code = 'VISUALIZADOR'
