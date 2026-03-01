@@ -75,7 +75,7 @@
     bindEvents();
     setDefaultDates();
     renderSessionState();
-    setView(state.isAuthenticated ? 'dashboard' : 'auth');
+    syncViewFromLocation(true);
     loadHealth();
 
     if (state.isAuthenticated) {
@@ -84,25 +84,26 @@
   }
 
   function bindEvents() {
-    nodes.navLinks.forEach((button) => {
-      button.addEventListener('click', function () {
-        const target = button.getAttribute('data-view-target');
+    nodes.navLinks.forEach((link) => {
+      link.addEventListener('click', function (event) {
+        const target = link.getAttribute('data-view-target');
         if (!target) {
           return;
         }
-        if (!state.isAuthenticated && target !== 'auth') {
+
+        if (!canAccessView(target)) {
+          event.preventDefault();
+          navigateToView('auth', true);
           showAlert('Necesitas iniciar sesion para acceder a esa vista.', true);
           return;
         }
-        setView(target);
-        if (target === 'dashboard') {
-          loadDashboard();
-        } else if (target === 'transactions') {
-          loadTransactions(state.transactions.page);
-        } else if (target === 'reports') {
-          loadReports(nodes.reportMonth.value);
-        }
+
+        navigateToView(target, true);
       });
+    });
+
+    window.addEventListener('hashchange', function () {
+      syncViewFromLocation(false);
     });
 
     nodes.loginForm.addEventListener('submit', handleLogin);
@@ -171,8 +172,9 @@
     nodes.apiStatusChip.textContent = formatHealthStatus(state.health);
     nodes.tokenStatusChip.textContent = state.isAuthenticated ? 'Activo' : 'No disponible';
     nodes.logoutButton.hidden = !state.isAuthenticated;
-    nodes.authOnlyLinks.forEach((button) => {
-      button.disabled = !state.isAuthenticated;
+    nodes.authOnlyLinks.forEach((link) => {
+      link.classList.toggle('is-disabled', !state.isAuthenticated);
+      link.setAttribute('aria-disabled', !state.isAuthenticated ? 'true' : 'false');
     });
   }
 
@@ -193,10 +195,12 @@
       panel.classList.toggle('is-active', matches);
     });
 
-    nodes.navLinks.forEach((button) => {
-      const matches = button.getAttribute('data-view-target') === viewName;
-      button.classList.toggle('is-active', matches);
+    nodes.navLinks.forEach((link) => {
+      const matches = link.getAttribute('data-view-target') === viewName;
+      link.classList.toggle('is-active', matches);
     });
+
+    loadViewData(viewName);
   }
 
   async function handleLogin(event) {
@@ -230,11 +234,10 @@
 
       persistSession();
       renderSessionState();
-      setView('dashboard');
+      navigateToView('dashboard', true);
       nodes.loginForm.reset();
       setDefaultDates();
       showAlert('Sesion iniciada. Se actualizaron las vistas protegidas.');
-      await loadAuthenticatedData();
     } catch (error) {
       handleError(error, 'No fue posible iniciar sesion.');
     } finally {
@@ -260,7 +263,7 @@
     state.refreshPromise = null;
     clearStoredSession();
     renderSessionState();
-    setView('auth');
+    navigateToView('auth', true);
     showAlert('Sesion cerrada.');
   }
 
@@ -314,6 +317,69 @@
       ]);
     } catch (_error) {
       // Cada carga ya informa su propio error.
+    }
+  }
+
+  function canAccessView(viewName) {
+    return state.isAuthenticated || viewName === 'auth';
+  }
+
+  function navigateToView(viewName, updateHash) {
+    const safeView = canAccessView(viewName) ? viewName : 'auth';
+    if (updateHash && window.location.hash !== '#' + safeView) {
+      window.location.hash = safeView;
+      return;
+    }
+
+    setView(safeView);
+  }
+
+  function syncViewFromLocation(useDefaultFallback) {
+    const requested = resolveViewFromHash(window.location.hash);
+
+    if (!requested) {
+      navigateToView(useDefaultFallback && state.isAuthenticated ? 'dashboard' : 'auth', true);
+      return;
+    }
+
+    if (!canAccessView(requested)) {
+      navigateToView('auth', true);
+      if (!useDefaultFallback) {
+        showAlert('Debes iniciar sesion antes de usar esa vista.', true);
+      }
+      return;
+    }
+
+    navigateToView(requested, false);
+  }
+
+  function resolveViewFromHash(hash) {
+    const cleaned = String(hash || '').replace(/^#/, '').trim().toLowerCase();
+    if (!cleaned) {
+      return '';
+    }
+
+    const allowed = ['auth', 'dashboard', 'transactions', 'reports'];
+    return allowed.indexOf(cleaned) >= 0 ? cleaned : '';
+  }
+
+  function loadViewData(viewName) {
+    if (!state.isAuthenticated) {
+      return;
+    }
+
+    if (viewName === 'dashboard') {
+      loadDashboard();
+      return;
+    }
+
+    if (viewName === 'transactions') {
+      loadTransactions(state.transactions.page);
+      return;
+    }
+
+    if (viewName === 'reports') {
+      loadReports(nodes.reportMonth.value);
     }
   }
 

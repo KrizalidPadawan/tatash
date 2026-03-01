@@ -18,10 +18,10 @@
       </div>
 
       <nav class="nav-grid">
-        <button type="button" class="nav-link is-active" data-view-target="auth">Acceso</button>
-        <button type="button" class="nav-link" data-view-target="dashboard" data-auth-only>Dashboard</button>
-        <button type="button" class="nav-link" data-view-target="transactions" data-auth-only>Transacciones</button>
-        <button type="button" class="nav-link" data-view-target="reports" data-auth-only>Reportes</button>
+        <a href="#auth" class="nav-link is-active" data-view-target="auth">Acceso</a>
+        <a href="#dashboard" class="nav-link" data-view-target="dashboard" data-auth-only>Dashboard</a>
+        <a href="#transactions" class="nav-link" data-view-target="transactions" data-auth-only>Transacciones</a>
+        <a href="#reports" class="nav-link" data-view-target="reports" data-auth-only>Reportes</a>
       </nav>
 
       <section class="status-card">
@@ -196,6 +196,22 @@
               </div>
             </div>
           </section>
+        </div>
+
+        <div class="panel-grid action-grid">
+          <article class="surface-panel quick-panel">
+            <p class="section-kicker">Accion rapida</p>
+            <h3>Registrar movimiento</h3>
+            <p class="panel-copy">Salta directo al formulario de alta para cargar ingresos o gastos sin buscar la vista manualmente.</p>
+            <a href="#transactions" class="ghost-button inline-link">Ir a transacciones</a>
+          </article>
+
+          <article class="surface-panel quick-panel">
+            <p class="section-kicker">Accion rapida</p>
+            <h3>Revisar cierre mensual</h3>
+            <p class="panel-copy">Consulta el balance del mes vigente y confirma la diferencia entre ingresos y gastos.</p>
+            <a href="#reports" class="ghost-button inline-link">Ir a reportes</a>
+          </article>
         </div>
       </section>
 
